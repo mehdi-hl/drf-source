@@ -1,4 +1,3 @@
-# from rest_framework.generics import ListCreateAPIView,RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
@@ -17,20 +16,12 @@ from .serializers import ArticleSerialiser , UserSerialiser
 #     serializer_class = ArticleSerialiser
 #     permission_classes =(IsStaffOrReadOnly,IsAuthorOrReadOnly)
 class AticleViewSet(ModelViewSet):
+	queryset = Article.objects.all()
 	serializer_class = ArticleSerialiser
-
-	def get_queryset(self):
-		queryset = Article.objects.all()
-		
-		status = self.request.query_params.get('status')
-		if status is not None:
-			queryset = queryset.filter(status=status)
-		
-		author = self.request.query_params.get('author')
-		if author is not None:
-			queryset = queryset.filter(author__username=author)
-
-		return queryset
+	filterset_fields=["status","author"]
+	ordering_fields = ['publish', 'status']
+	ordering=["-publish"]
+	search_fields = ["title","content","author__username","author__last_name","author__first_name",]
 	def get_permissions(self):
 		if self.action in ['list','create']:
 			permission_classes = [IsStaffOrReadOnly]
